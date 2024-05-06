@@ -11,7 +11,7 @@
   left: 0;
   right: 0;
 }
-/** login button */
+
 .login {
   position: absolute;
   top: 1em;
@@ -55,17 +55,18 @@
 }
 
 .modal button {
-  padding: 0.5em 1em;
+  padding: 1em 1.5em;
   border: 1px solid #ccc;
-  border-radius: 0.5em;
-  background-color: #f8f8f8;
-  color: #d85151;
+  border-radius: 0.9em;
+  background-color: #d85151 ;
+  color: white;
+  font-weight: 500;
   text-decoration: none;
   transition: background-color 300ms;
 }
 .modal button:hover {
   background-color: #d85151;
-  color: #f8f824;
+  color: white;
 }
 
 .register {
