@@ -1,34 +1,115 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import Header from './layouts/header'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [loginModal, setLoginModal] = useState(false)
+  const [registerModal, setRegisterModal] = useState(false)
+  const [login, setLogin] = useState('');
+
+  const handleLoginModal = () => {
+    setLoginModal(!loginModal)
+  }
+  const handleRegisterModal = () => {
+    setRegisterModal(!registerModal)
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
+      <Header />
+      <LoginModal display={loginModal} handleOutsideClick={handleLoginModal} setLogin={setLogin}/>
+      <RegisterModal display={registerModal} handleOutsideClick={handleRegisterModal} />
+
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        {
+          login ? <p>{login}</p> : null
+        }
+        {
+          login ? null :
+          <button className='login' onClick={() => {
+            handleLoginModal()
+          }}>Login</button>
+        }
+        {
+          login ? null :
+        <button className='register' onClick={() => {
+          handleRegisterModal()
+        }}>Register</button>
+        }
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
+  )
+}
+
+function LoginModal({ display, handleOutsideClick, setLogin }: { display: boolean, handleOutsideClick: () => void, setLogin: (login: string) => void}) {
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const modalRef = useRef(null);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (modalRef.current && !(modalRef.current as any).contains(event.target as Node)) {
+        handleOutsideClick();
+        setPassword('');
+        setUsername('');
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleOutsideClick]);
+  if (!display) {
+    return null
+  }
+
+  return (
+    <div ref={modalRef} className='modal'>
+      <p>Login</p>
+      <input type='text' placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} />
+      <input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={() => {
+        console.log('login')
+        setLogin('Here I am')
+        handleOutsideClick()
+      }}>Login</button>
+    </div>
+  )
+}
+
+function RegisterModal({ display, handleOutsideClick }: { display: boolean, handleOutsideClick: () => void }) {
+  const modalRef = useRef(null);
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (modalRef.current && !(modalRef.current as any).contains(event.target as Node)) {
+        handleOutsideClick();
+        setUsername('')
+        setPassword('')
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [handleOutsideClick]);
+  if (!display) {
+    return null
+  }
+
+  return (
+    <div ref={modalRef} className='modal'>
+      <p>Register</p>
+      <input type='text' placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} />
+      <input type='password' placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
+      <button onClick={() => {
+        console.log('register')
+      }}>Register</button>
+    </div>
   )
 }
 

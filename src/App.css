@@ -5,6 +5,82 @@
   text-align: center;
 }
 
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+/** login button */
+.login {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f8f8f8;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 300ms;
+}
+
+.modal {
+  position: fixed;
+  flex-direction: column;
+  /** center the modal */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2em;
+  border-radius: 0.5em;
+  background-color: #f8f8f8;
+  box-shadow: 0 0 1em #0008;
+  z-index: 1;
+  min-width: 20em;
+  min-height: 20em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal input {
+  margin: 0.5em;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  position: relative;
+  display: block;
+  width: 60%;
+}
+
+.modal button {
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f8f8f8;
+  color: #d85151;
+  text-decoration: none;
+  transition: background-color 300ms;
+}
+.modal button:hover {
+  background-color: #d85151;
+  color: #f8f824;
+}
+
+.register {
+  position: absolute;
+  top: 1em;
+  right: 6em;
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f8f8f8;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 300ms;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
