@@ -44,6 +44,20 @@
   align-items: center;
 }
 
+.search-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  padding: 1em;
+  margin: auto;
+  min-width: 70vw;
+  /** placeholder in middle */
+  text-align: center;
+  font: 120%;
+}
+
 .modal input {
   margin: 0.5em;
   padding: 0.5em;

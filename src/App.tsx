@@ -1,12 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import Header from './layouts/header'
+import {
+  useQuery,
+} from '@tanstack/react-query'
 
 function App() {
   const [loginModal, setLoginModal] = useState(false)
   const [registerModal, setRegisterModal] = useState(false)
   const [login, setLogin] = useState('');
   const [search, setSearch] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isPending, _error, data } = useQuery({
+    queryKey: ['me'],
+
+    queryFn: async () => {
+      const response = await fetch('http://127.0.0.1:3001/api/v1/users/me', {
+        method: 'GET',
+        credentials: 'include'
+      })
+      return response.json()
+    }
+  })
+  const isLogin = !isPending && data.username
+  // if (!isPending && data.error) {
+  //   setLogin(''); // we are not logged in!
+  // } else if (!isPending && data.username) {
+  //   setLogin(data.username); // we are logged in!
+  // }
   const onSearch = (search: string) => {
     console.log('search', search)
   }
@@ -23,7 +44,7 @@ function App() {
       <Header />
       <LoginModal display={loginModal} handleOutsideClick={handleLoginModal} setLogin={setLogin}/>
       <RegisterModal display={registerModal} handleOutsideClick={handleRegisterModal} />
-
+      <p>Logged in as {isLogin ? data.username : ''}</p>
       <div className="card">
         {
           login ? <p>{login}</p> : null
@@ -166,11 +187,12 @@ function RegisterModal({ display, handleOutsideClick }: { display: boolean, hand
 
 async function fetchLogin(username: string, password: string): Promise<{ success: boolean, message: string }> {
   try {
-    const response = await fetch('http://localhost:3001/api/v1/users/login', {
+    const response = await fetch('http://127.0.0.1:3001/api/v1/users/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({
         username,
         password
@@ -187,7 +209,7 @@ async function fetchLogin(username: string, password: string): Promise<{ success
 
 async function fetchRegister(username: string, password: string): Promise<{ success: boolean, message: string }> {
   try {
-    const response = await fetch('http://localhost:3001/api/v1/users/register', {
+    const response = await fetch('http://127.0.0.1:3001/api/v1/users/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
