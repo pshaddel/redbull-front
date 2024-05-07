@@ -5,24 +5,35 @@ import {
   useQuery,
 } from '@tanstack/react-query'
 
+const api = 'http://127.0.0.1:5173/api/v1'
+const apis = {
+  me: `${api}/users/me`,
+  login: `${api}/users/login`,
+  register: `${api}/users/register`,
+  logout: `${api}/users/logout`
+}
 function App() {
   const [loginModal, setLoginModal] = useState(false)
   const [registerModal, setRegisterModal] = useState(false)
   const [login, setLogin] = useState('');
   const [search, setSearch] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isPending, _error, data } = useQuery({
+  const { isPending, error, data } = useQuery({
     queryKey: ['me'],
 
     queryFn: async () => {
-      const response = await fetch('http://127.0.0.1:3001/api/v1/users/me', {
+      const response = await fetch(apis.me, {
         method: 'GET',
         credentials: 'include'
       })
       return response.json()
     }
   })
-  const isLogin = !isPending && data.username
+  if (error) {
+    console.log('error', error)
+  }
+  console.log('data', data.user.username)
+  const isLogin = !isPending && data.user
   // if (!isPending && data.error) {
   //   setLogin(''); // we are not logged in!
   // } else if (!isPending && data.username) {
@@ -44,22 +55,30 @@ function App() {
       <Header />
       <LoginModal display={loginModal} handleOutsideClick={handleLoginModal} setLogin={setLogin}/>
       <RegisterModal display={registerModal} handleOutsideClick={handleRegisterModal} />
-      <p>Logged in as {isLogin ? data.username : ''}</p>
+      <p>Logged in as {isLogin ? data?.user?.username : ''}</p>
       <div className="card">
         {
           login ? <p>{login}</p> : null
         }
         {
-          login ? null :
+          isLogin ? null :
           <button className='login' onClick={() => {
             handleLoginModal()
           }}>Login</button>
         }
         {
-          login ? null :
+          isLogin ? null :
         <button className='register' onClick={() => {
           handleRegisterModal()
         }}>Register</button>
+        }
+        {
+          isLogin ? <button className='login' onClick={async () => {
+            const success = await logout()
+            if (success) {
+              setLogin('')
+            }
+          }}>Logout</button> : null
         }
       </div>
       <SearchBox search={search} setSearch={setSearch} onSearch={onSearch} />
@@ -187,7 +206,7 @@ function RegisterModal({ display, handleOutsideClick }: { display: boolean, hand
 
 async function fetchLogin(username: string, password: string): Promise<{ success: boolean, message: string }> {
   try {
-    const response = await fetch('http://127.0.0.1:3001/api/v1/users/login', {
+    const response = await fetch(apis.login, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -209,7 +228,7 @@ async function fetchLogin(username: string, password: string): Promise<{ success
 
 async function fetchRegister(username: string, password: string): Promise<{ success: boolean, message: string }> {
   try {
-    const response = await fetch('http://127.0.0.1:3001/api/v1/users/register', {
+    const response = await fetch(apis.register, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -225,6 +244,19 @@ async function fetchRegister(username: string, password: string): Promise<{ succ
     return { success: status === 200, message: error }
   } catch (error) {
     return { success: false, message: 'error' }
+  }
+}
+
+async function logout() {
+  try {
+    const response = await fetch(apis.logout, {
+      method: 'POST',
+      credentials: 'include'
+    })
+    const status = response.status
+    return status === 200
+  } catch (error) {
+    return false
   }
 }
 
