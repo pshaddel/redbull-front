@@ -7,16 +7,20 @@ import {
 
 const api = 'http://127.0.0.1:5173/api/v1'
 const apis = {
-  me: `${api}/users/me`,
-  login: `${api}/users/login`,
-  register: `${api}/users/register`,
-  logout: `${api}/users/logout`
-}
+  me: `${api}/users/me` as const,
+  login: `${api}/users/login` as const,
+  register: `${api}/users/register` as const,
+  logout: `${api}/users/logout` as const,
+  searchImage: `${api}/contents/image` as const,
+  searchVideo: `${api}/contents/video` as const,
+} as const
 function App() {
   const [loginModal, setLoginModal] = useState(false)
   const [registerModal, setRegisterModal] = useState(false)
   const [login, setLogin] = useState('');
   const [search, setSearch] = useState('');
+  const [searchType, setSearchType] = useState<'image' | 'video'>('image')
+  const [page, setPage] = useState(1)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isPending, error, data } = useQuery({
     queryKey: ['me'],
@@ -30,18 +34,10 @@ function App() {
     }
   })
   if (error) {
-    console.log('error', error)
+    console.log('not logged in')
   }
-  console.log('data', data.user.username)
+  // console.log('data', data?.user?.username)
   const isLogin = !isPending && data.user
-  // if (!isPending && data.error) {
-  //   setLogin(''); // we are not logged in!
-  // } else if (!isPending && data.username) {
-  //   setLogin(data.username); // we are logged in!
-  // }
-  const onSearch = (search: string) => {
-    console.log('search', search)
-  }
 
   const handleLoginModal = () => {
     setLoginModal(!loginModal)
@@ -55,10 +51,9 @@ function App() {
       <Header />
       <LoginModal display={loginModal} handleOutsideClick={handleLoginModal} setLogin={setLogin}/>
       <RegisterModal display={registerModal} handleOutsideClick={handleRegisterModal} />
-      <p>Logged in as {isLogin ? data?.user?.username : ''}</p>
       <div className="card">
         {
-          login ? <p>{login}</p> : null
+          login ? <p> Welcome {login}</p> : null
         }
         {
           isLogin ? null :
@@ -81,31 +76,39 @@ function App() {
           }}>Logout</button> : null
         }
       </div>
-      <SearchBox search={search} setSearch={setSearch} onSearch={onSearch} />
+      {
+        !isLogin ? null : <>
+      <select onChange={(e) => setSearchType(e.target.value as 'image' | 'video')}>
+        <option value='image'>Image</option>
+        <option value='video'>Video</option>
+      </select>
+      <SearchBox setSearch={setSearch} />
+      <button disabled={page <= 1 } onClick={() => setPage(page - 1)}>Previous</button>
+      <button  onClick={() => setPage(page + 1)}>Next</button>
+      <Contents searchPhrase={search} page={page} searchType={searchType} />
+        </>
+      }
     </>
   )
 }
 
 function SearchBox({
-  search,
   setSearch,
-  onSearch
 }: {
-  search: string,
   setSearch: (search: string) => void
-  onSearch: (search: string) => void
 }) {
+  const [text, setText] = useState('')
   // only on enter run the function
   return (
     <input
       className='search-box'
       type='text'
       placeholder='Search'
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
+      value={text}
+      onChange={(e) => setText(e.target.value)}
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
-          onSearch(search)
+          setSearch(text)
         }
       }}
     />
@@ -157,6 +160,63 @@ function LoginModal({ display, handleOutsideClick, setLogin }: { display: boolea
       }
     </div>
   )
+}
+
+function Contents({ searchPhrase, page = 1, searchType }: { searchPhrase: string, page: number, searchType: 'image' | 'video' }) {
+  const { data, error, isPending } = useQuery({
+    queryKey: ['search', searchPhrase, 'page', page, 'type', searchType],
+    queryFn: async () => {
+      const response = await fetch(`${searchType === 'image' ? apis.searchImage : apis.searchVideo }?query=${searchPhrase}&page=${page}`);
+      return response.json()
+    }
+  })
+
+
+  if (!searchPhrase) {
+    return <p>Search for something</p>
+  }
+
+  if (isPending) {
+    return <p>Loading...</p>
+  }
+  if (error) {
+    return <p>Error getting data</p>
+  }
+
+  if (data?.length === 0) {
+    return <p>No results</p>
+  }
+
+
+  const {
+    contents,
+    total,
+  } = data as { contents: {
+    id: string,
+  src: string,
+  width: number,
+  height: number,
+  thumbnail: string,
+  thumbnailWidth: number,
+  thumbnailHeight: number,
+  type: string,
+  }[], total: number }
+  return <div className='contents'>
+    <p>Results for {searchPhrase}</p>
+    <p>Total: {total}  - Page {page}</p>
+    <div className='content-list'>
+      {
+        contents?.map((content, index) => {
+          return <div key={index} className='content' onClick={() => {
+            const link = content.src; // image or png
+            window.open(link, '_blank');
+          }}>
+            <img style={{width: '120px', height: 'auto'}} src={content.thumbnail} alt={content.id} width={content.thumbnailWidth} height={content.thumbnailHeight}/>
+          </div>
+        })
+      }
+      </div>
+  </div>
 }
 
 function RegisterModal({ display, handleOutsideClick }: { display: boolean, handleOutsideClick: () => void }) {

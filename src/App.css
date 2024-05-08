@@ -83,6 +83,32 @@
   color: white;
 }
 
+.content-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  left: 1em;
+  right: 2em;
+  /* margin-right: 3em; */
+
+}
+
+.content {
+  padding: 1em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  background-color: #f8f8f8;
+  color: #333;
+  text-decoration: none;
+  transition: background-color 300ms;
+  cursor: pointer;
+}
+
 .register {
   position: absolute;
   top: 1em;
